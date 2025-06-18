@@ -13,7 +13,7 @@ use shlex::{split, try_quote};
 /// A simple CLI application that captures standard output
 /// and error of a command
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[clap(name = "pipe", author, version, about, long_about = None)]
 pub struct Cli {
     /// The variable to store the standard output in
     #[arg()]

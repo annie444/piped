@@ -1,5 +1,5 @@
 [package]
-name = "piped"
+name = "pipe-cli"
 version = "0.1.0"
 edition = "2024"
 authors = ["Annie Ehler <annie.ehler.4@gmail.com>"]

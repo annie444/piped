@@ -1,6 +1,6 @@
 [package]
 name = "pipe-cli"
-version = "0.1.1"
+version = "0.1.0"
 edition = "2024"
 authors = ["Annie Ehler <annie.ehler.4@gmail.com>"]
 description = "A simple command line tool to pipe data between commands"

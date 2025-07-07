@@ -1,0 +1,11 @@
+version = "0.1.0"
+
+[[files]]
+file = "Cargo.toml"
+expr = 'version = "(.*)"'
+
+[[files]]
+file = "sonar-project.properties"
+expr = "sonar.projectVersion=(.*)"
+
+[package]

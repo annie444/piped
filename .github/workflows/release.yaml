@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test-ubuntu:
+    name: Build and Text on Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
+
+      - name: Build
+        run: cargo build --release --verbose
+
+      - name: Test
+        run: cargo test --release --verbose
+
+  test-windows:
+    name: Build and Text on Windows
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
+
+      - name: Build
+        run: cargo build --release --verbose
+
+      - name: Test
+        run: cargo test --release --verbose
+
+  test-macos:
+    name: Build and Text on MacOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
+
+      - name: Build
+        run: cargo build --release --verbose
+
+      - name: Test
+        run: cargo test --release --verbose
+
+  publish:
+    name: Publish package
+    runs-on: ubuntu-latest
+    needs:
+      - test-ubuntu
+      - test-windows
+      - test-macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache-key: ${{ runner.os }}-stable
+
+      - name: Login into crates.io
+        run: cargo login ${{ secrets.CRATES_IO }}
+
+      - name: Build binaries in "release" mode
+        run: cargo build --release --verbose
+
+      - name: "Package for crates.io"
+        run: cargo package # publishes a package as a tarball
+
+      - name: "Publish to crates.io"
+        run: cargo publish # publishes the crate

@@ -1,14 +1,15 @@
 use clap::{
-    builder::{ArgAction, ArgPredicate}, Parser,
-};
-use std::{
-    io::{BufRead, BufReader}, 
-    path::Path, 
-    process::{exit, Command, Stdio}, 
-    sync::mpsc::{channel, Receiver, Sender},
-    thread
+    Parser,
+    builder::{ArgAction, ArgPredicate},
 };
 use shlex::{split, try_quote};
+use std::{
+    io::{BufRead, BufReader},
+    path::Path,
+    process::{Command, Stdio, exit},
+    sync::mpsc::{Receiver, Sender, channel},
+    thread,
+};
 
 /// A simple CLI application that captures standard output
 /// and error of a command
@@ -31,9 +32,9 @@ pub struct Cli {
     /// Whether to export the environment variables
     /// or just set them
     #[arg(
-        short = 'x', 
-        long = "export", 
-        default_value_t = false, 
+        short = 'x',
+        long = "export",
+        default_value_t = false,
         action = ArgAction::SetTrue
     )]
     export: bool,
@@ -41,9 +42,9 @@ pub struct Cli {
     /// Whether to capture the output of the command (default)
     /// or pipe it to the terminal
     #[arg(
-        short = 'c', 
-        long = "capture", 
-        default_value_t = true, 
+        short = 'c',
+        long = "capture",
+        default_value_t = true,
         action = ArgAction::SetFalse
     )]
     capture: bool,
@@ -85,32 +86,30 @@ pub struct Cli {
     /// The shell to use if `shell` is true
     /// Defaults to `$SHELL`
     #[arg(
-        long, 
-        env = "SHELL", 
-        default_value = "/bin/sh", 
-        action = ArgAction::Set, 
+        long,
+        env = "SHELL",
+        default_value = "/bin/sh",
+        action = ArgAction::Set,
         required_if_eq("sh", "true")
     )]
     shell: String,
 
     /// The command to run
-    /// This may need to be separated with `--` if it conflicts with 
+    /// This may need to be separated with `--` if it conflicts with
     /// other options or has special flags
     #[arg(action = ArgAction::Append)]
     command: Vec<String>,
 }
-
 
 fn main() {
     let mut cli = Cli::parse();
     let (stdout_sender, stdout_receiver): (Sender<String>, Receiver<String>) = channel();
     let (stderr_sender, stderr_receiver): (Sender<String>, Receiver<String>) = channel();
 
-    cli.command = split(&cli.command.join(" "))
-        .unwrap_or_else(|| {
-            eprintln!("Failed to parse command arguments");
-            exit(1);
-        });
+    cli.command = split(&cli.command.join(" ")).unwrap_or_else(|| {
+        eprintln!("Failed to parse command arguments");
+        exit(1);
+    });
 
     let mut command = if cli.sh {
         let args = cli.command.join(" ");
@@ -126,8 +125,7 @@ fn main() {
         obj.args(args);
         obj
     };
-    command.stdout(Stdio::piped())
-           .stderr(Stdio::piped());
+    command.stdout(Stdio::piped()).stderr(Stdio::piped());
     let (out, err, ec) = if let Ok(mut child) = command.spawn() {
         let mut stdout = BufReader::new(child.stdout.take().expect("Failed to capture stdout"));
         let mut stderr = BufReader::new(child.stderr.take().expect("Failed to capture stderr"));
@@ -137,12 +135,12 @@ fn main() {
                 if len == 0 {
                     break; // EOF
                 }
-                if !cli.capture || !cli.capture_out {
-                    if !out.is_empty() {
-                        eprint!("{}", out);
-                    }
+                if (!cli.capture || !cli.capture_out) && !out.is_empty() {
+                    eprint!("{out}");
                 }
-                stdout_sender.send(out.clone()).expect("Failed to send stdout");
+                stdout_sender
+                    .send(out.clone())
+                    .expect("Failed to send stdout");
                 out.clear();
             }
         });
@@ -152,12 +150,12 @@ fn main() {
                 if len == 0 {
                     break; // EOF
                 }
-                if !cli.capture || !cli.capture_err {
-                    if !err.is_empty() {
-                        eprint!("{}", err);
-                    }
+                if (!cli.capture || !cli.capture_err) && !err.is_empty() {
+                    eprint!("{err}");
                 }
-                stderr_sender.send(err.clone()).expect("Failed to send stderr");
+                stderr_sender
+                    .send(err.clone())
+                    .expect("Failed to send stderr");
                 err.clear();
             }
         });
@@ -179,12 +177,12 @@ fn main() {
                 }
                 err.push_str(&msg);
             }
-            err 
+            err
         });
         let ec = match child.wait() {
             Ok(status) => status.code().unwrap_or(1),
             Err(e) => {
-                eprintln!("Failed to wait for child process: {}", e);
+                eprintln!("Failed to wait for child process: {e}");
                 1
             }
         };
@@ -211,16 +209,16 @@ fn main() {
     };
 
     let var = set_var(&cli.shell, cli.export, &cli.stdout, &out);
-    println!("{};", var);
+    println!("{var};");
     let var = set_var(&cli.shell, cli.export, &cli.stderr, &err);
-    println!("{};", var);
+    println!("{var};");
     if let Some(ref exit_code) = cli.exit_code {
         let var = set_var(&cli.shell, cli.export, exit_code, &ec.to_string());
-        println!("{};", var);
+        println!("{var};");
     }
 }
 
-fn get_shell<'a>(sh: &'a str) -> (&'a str, Vec<&'static str>) {
+fn get_shell(sh: &str) -> (&str, Vec<&'static str>) {
     let shell = Path::new(sh);
     match shell.file_name().unwrap().to_str().unwrap() {
         "sh" | "zsh" => (sh, vec!["-c"]),
@@ -234,7 +232,7 @@ fn set_var(shell: &str, export: bool, name: &str, value: &str) -> String {
     let value = match try_quote(value) {
         Ok(v) => v,
         Err(_) => {
-            eprintln!("Failed to quote value: {}", value);
+            eprintln!("Failed to quote value: {value}");
             exit(1);
         }
     };
@@ -242,23 +240,23 @@ fn set_var(shell: &str, export: bool, name: &str, value: &str) -> String {
     match shell.file_name().unwrap().to_str().unwrap() {
         "sh" | "zsh" | "bash" => {
             if export {
-                format!("export {}={}", name, value)
+                format!("export {name}='{value}'")
             } else {
-                format!("{}={}", name, value)
+                format!("{name}={value}")
             }
-        },
+        }
         "fish" => {
             if export {
-                format!("set -gx {} {}", name, value)
+                format!("set -gx {name} {value}")
             } else {
-                format!("set {} {}", name, value)
+                format!("set {name} {value}")
             }
         }
         "csh" | "tcsh" => {
             if export {
-                format!("setenv {} {}", name, value)
+                format!("setenv {name} {value}")
             } else {
-                format!("set {} {}", name, value)
+                format!("set {name} {value}")
             }
         }
         _ => String::new(),

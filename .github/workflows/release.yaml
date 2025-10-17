@@ -1,9 +1,9 @@
 name: Release
 
 on:
-  release:
-    types:
-      - created
+  push:
+    tags:
+      - "v*.*.*"
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,11 +28,53 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
 
+      - name: Test
+        run: cargo test --release --verbose
+
       - name: Build
         run: cargo build --release --verbose
 
-      - name: Test
-        run: cargo test --release --verbose
+      - name: Get the runner architecture
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/github-script@v8
+        id: arch
+        with:
+          script: |
+            const targetTest = /host:\s([\w-]+)/;
+            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const matchResult = out.stdout.match(targetTest);
+            if (matchResult && matchResult.length >= 2) {
+              core.setOutput("target-triple", matchResult[1]);
+            } else {
+              core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
+            }
+
+      - name: Create a tarball
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          cwd: ./target/release
+          files: |
+            ./pipe
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+
+      - name: Generate checksum
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: jmgilman/actions-generate-checksum@v1
+        with:
+          method: sha256
+          patterns: |
+            pipe-*.tar.gz
+          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
+
+      - name: Upload artifacts
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: "build-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
 
   test-windows:
     name: Build and Text on Windows
@@ -53,11 +95,53 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
 
+      - name: Test
+        run: cargo test --release --verbose
+
       - name: Build
         run: cargo build --release --verbose
 
-      - name: Test
-        run: cargo test --release --verbose
+      - name: Get the runner triple
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/github-script@v8
+        id: arch
+        with:
+          script: |
+            const targetTest = /host:\s([\w-]+)/;
+            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const matchResult = out.stdout.match(targetTest);
+            if (matchResult && matchResult.length >= 2) {
+              core.setOutput("target-triple", matchResult[1]);
+            } else {
+              core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
+            }
+
+      - name: Create a tarball
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          cwd: ./target/release
+          files: |
+            ./pipe
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+
+      - name: Generate checksum
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: jmgilman/actions-generate-checksum@v1
+        with:
+          method: sha256
+          patterns: |
+            pipe-*.tar.gz
+          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
+
+      - name: Upload artifacts
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: "build-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
 
   test-macos:
     name: Build and Text on MacOS
@@ -78,11 +162,53 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
 
+      - name: Test
+        run: cargo test --release --verbose
+
       - name: Build
         run: cargo build --release --verbose
 
-      - name: Test
-        run: cargo test --release --verbose
+      - name: Get the runner triple
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/github-script@v8
+        id: arch
+        with:
+          script: |
+            const targetTest = /host:\s([\w-]+)/;
+            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const matchResult = out.stdout.match(targetTest);
+            if (matchResult && matchResult.length >= 2) {
+              core.setOutput("target-triple", matchResult[1]);
+            } else {
+              core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
+            }
+
+      - name: Create a tarball
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          cwd: ./target/release
+          files: |
+            ./pipe
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+
+      - name: Generate checksum
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: jmgilman/actions-generate-checksum@v1
+        with:
+          method: sha256
+          patterns: |
+            pipe-*.tar.gz
+          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
+
+      - name: Upload artifacts
+        if: ${{ matrix.toolchain == 'stable' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: "build-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
 
   publish:
     name: Publish package
@@ -112,3 +238,52 @@ jobs:
 
       - name: "Publish to crates.io"
         run: cargo publish # publishes the crate
+
+  changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    needs:
+      - test-ubuntu
+      - test-windows
+      - test-macos
+    outputs:
+      changelog: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+  upload:
+    name: Upload the release
+    needs:
+      - changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: build-*
+          path: ./build/
+          merge-multiple: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          make_latest: true
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: ${{ needs.changelog.outputs.changelog }}
+          files: |
+            ./build/pipe-*

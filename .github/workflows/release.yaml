@@ -115,7 +115,7 @@ jobs:
           command: c
           cwd: ./target/release
           files: |
-            ./pipe
+            ./pipe.exe
           outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
       - name: Upload artifacts

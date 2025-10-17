@@ -41,7 +41,7 @@ jobs:
         with:
           script: |
             const targetTest = /host:\s([\w-]+)/;
-            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const out = await exec.getExecOutput('rustc', ['-v', '-V']);
             const matchResult = out.stdout.match(targetTest);
             if (matchResult && matchResult.length >= 2) {
               core.setOutput("target-triple", matchResult[1]);
@@ -108,7 +108,7 @@ jobs:
         with:
           script: |
             const targetTest = /host:\s([\w-]+)/;
-            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const out = await exec.getExecOutput('rustc', ['-v', '-V']);
             const matchResult = out.stdout.match(targetTest);
             if (matchResult && matchResult.length >= 2) {
               core.setOutput("target-triple", matchResult[1]);
@@ -175,7 +175,7 @@ jobs:
         with:
           script: |
             const targetTest = /host:\s([\w-]+)/;
-            const out = await exec.getExecOutput('rustc', ['-v', '-V'], options);
+            const out = await exec.getExecOutput('rustc', ['-v', '-V']);
             const matchResult = out.stdout.match(targetTest);
             if (matchResult && matchResult.length >= 2) {
               core.setOutput("target-triple", matchResult[1]);

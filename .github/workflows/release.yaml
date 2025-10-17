@@ -209,12 +209,12 @@ jobs:
         run: cargo build --release --verbose
 
       - name: "Package for crates.io"
-        run: cargo package # publishes a package as a tarball
+        run: cargo package --allow-dirty # publishes a package as a tarball
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO }}
 
       - name: "Publish to crates.io"
-        run: cargo publish # publishes the crate
+        run: cargo publish --allow-dirty # publishes the crate
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO }}
 

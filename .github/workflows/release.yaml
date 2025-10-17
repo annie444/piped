@@ -60,21 +60,12 @@ jobs:
             ./pipe
           outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
-      - name: Generate checksum
-        if: ${{ matrix.toolchain == 'stable' }}
-        uses: jmgilman/actions-generate-checksum@v1
-        with:
-          method: sha256
-          patterns: |
-            pipe-*.tar.gz
-          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
-
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "build-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
+          name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
   test-windows:
     name: Build and Text on Windows
@@ -127,21 +118,12 @@ jobs:
             ./pipe
           outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
-      - name: Generate checksum
-        if: ${{ matrix.toolchain == 'stable' }}
-        uses: jmgilman/actions-generate-checksum@v1
-        with:
-          method: sha256
-          patterns: |
-            pipe-*.tar.gz
-          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
-
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "build-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
+          name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
   test-macos:
     name: Build and Text on MacOS
@@ -194,21 +176,12 @@ jobs:
             ./pipe
           outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
-      - name: Generate checksum
-        if: ${{ matrix.toolchain == 'stable' }}
-        uses: jmgilman/actions-generate-checksum@v1
-        with:
-          method: sha256
-          patterns: |
-            pipe-*.tar.gz
-          output: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz.sha256sum.txt
-
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "build-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.*
+          name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
 
   publish:
     name: Publish package
@@ -273,9 +246,22 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v5
         with:
-          pattern: build-*
+          pattern: build-${{ github.ref_name }}-*
           path: ./build/
           merge-multiple: true
+
+      - name: Create a checksum for each file
+        shell: bash
+        working-directory: ./build
+        run: |
+          for file in ./*.tar.gz; do
+            if [[ ! -f "$file" ]]; then
+              echo -e "::error::\033[1;31mMissing $file! Unable to create checksums.\033[0m"
+              exit 1
+            fi
+            echo -e "::info::\033[0;36mCalculating the checksum for $file.\033[0m"
+            shasum -a 256 "$file" > "$file.sha256sum.txt"
+          done
 
       - name: Release
         uses: softprops/action-gh-release@v2

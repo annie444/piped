@@ -51,7 +51,7 @@ jobs:
 
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c
@@ -109,7 +109,7 @@ jobs:
 
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c
@@ -167,7 +167,7 @@ jobs:
 
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c

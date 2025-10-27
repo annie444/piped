@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
           path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
           path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
@@ -178,7 +178,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
           path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz

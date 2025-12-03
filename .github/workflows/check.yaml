@@ -16,6 +16,8 @@ jobs:
   sonarqube:
     name: SonarQube
     runs-on: ubuntu-latest
+    environment:
+      name: sonarqube
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,6 +48,8 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+    environment:
+      name: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,6 +71,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    environment:
+      name: lint
     strategy:
       matrix:
         toolchain:

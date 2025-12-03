@@ -32,6 +32,8 @@ jobs:
   audit:
     name: Audit Dependencies
     runs-on: ubuntu-latest
+    environment:
+      name: audit
     permissions:
       contents: read
       issues: write

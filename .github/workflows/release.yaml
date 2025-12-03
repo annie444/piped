@@ -12,6 +12,8 @@ jobs:
   test-ubuntu:
     name: Build and Text on Linux
     runs-on: ubuntu-latest
+    environment:
+      name: pre-release
     strategy:
       matrix:
         toolchain:
@@ -70,6 +72,8 @@ jobs:
   test-windows:
     name: Build and Text on Windows
     runs-on: windows-latest
+    environment:
+      name: pre-release
     strategy:
       matrix:
         toolchain:
@@ -128,6 +132,8 @@ jobs:
   test-macos:
     name: Build and Text on MacOS
     runs-on: macos-latest
+    environment:
+      name: pre-release
     strategy:
       matrix:
         toolchain:

@@ -7,13 +7,18 @@ description = "A simple command line tool to pipe data between commands"
 documentation = "https://github.com/annie444/piped"
 readme = "README.md"
 homepage = "https://github.com/annie444/piped"
-repository = "https://github.com/annie444/piped.git"
+repository = "https://github.com/annie444/piped"
 license = "MIT"
 keywords = ["pipe", "cli", "command line", "data piping"]
 categories = ["command-line-utilities", "data-processing"]
 build = "build.rs"
 autolib = false
 autobins = false
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }{ archive-suffix }"
+bin-dir = "{ name }-v{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
 
 [[bin]]
 name = "pipe"

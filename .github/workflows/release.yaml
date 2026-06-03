@@ -51,23 +51,29 @@ jobs:
               core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
             }
 
+      - name: Create the release directory
+        if: ${{ matrix.toolchain == 'stable' }}
+        run: |
+          mkdir "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          cp ./target/release/pipe "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe"
+          cp ./target/release/pipe.1 "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe.1"
+
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
         uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c
-          cwd: ./target/release
           files: |
-            ./pipe
-          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+            ./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
   test-windows:
     name: Build and Text on Windows
@@ -111,23 +117,29 @@ jobs:
               core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
             }
 
+      - name: Create the release directory
+        if: ${{ matrix.toolchain == 'stable' }}
+        run: |
+          mkdir "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          cp ./target/release/pipe.exe "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe.exe"
+          cp ./target/release/pipe.1 "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe.1"
+
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
         uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c
-          cwd: ./target/release
           files: |
-            ./pipe.exe
-          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+            ./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
   test-macos:
     name: Build and Text on MacOS
@@ -171,23 +183,29 @@ jobs:
               core.setFailed(`Unable to determine the target triple from ${out.stdout}`);
             }
 
+      - name: Create the release directory
+        if: ${{ matrix.toolchain == 'stable' }}
+        run: |
+          mkdir "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
+          cp ./target/release/pipe "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe"
+          cp ./target/release/pipe.1 "./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}/pipe.1"
+
       - name: Create a tarball
         if: ${{ matrix.toolchain == 'stable' }}
         uses: a7ul/tar-action@v1.2.0
         id: compress
         with:
           command: c
-          cwd: ./target/release
           files: |
-            ./pipe
-          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+            ./pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}
+          outPath: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
       - name: Upload artifacts
         if: ${{ matrix.toolchain == 'stable' }}
         uses: actions/upload-artifact@v5
         with:
           name: "build-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}"
-          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tar.gz
+          path: pipe-${{ github.ref_name }}-${{ steps.arch.outputs.target-triple }}.tgz
 
   publish:
     name: Publish package
@@ -270,7 +288,7 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
-          for file in ./*.tar.gz; do
+          for file in ./*.tgz; do
             if [[ ! -f "$file" ]]; then
               echo -e "::error::\033[1;31mMissing $file! Unable to create checksums.\033[0m"
               exit 1

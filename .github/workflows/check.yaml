@@ -13,28 +13,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  sonarqube:
-    name: SonarQube
-    runs-on: ubuntu-latest
-    environment:
-      name: sonarqube
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-          cache-key: ${{ runner.os }}-stable
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   test:
     name: Test
     runs-on: ${{ matrix.runner }}
@@ -89,7 +67,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          components: clippy,rustfmt
+          components: clippy
           cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
 
       - name: Run cargo checks
@@ -98,8 +76,49 @@ jobs:
       - name: Run clippy
         run: cargo clippy --verbose -- -D warnings
 
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    environment:
+      name: format
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt
+          cache-key: ${{ runner.os }}-${{ matrix.toolchain }}
+
       - name: Run rustfmt
         uses: actions-rust-lang/rustfmt@v1
+
+  deny:
+    name: Cargo deny
+    runs-on: ubuntu-latest
+    environment:
+      name: deny
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache-key: ${{ runner.os }}-stable
 
       - name: Run cargo-deny
         uses: EmbarkStudios/cargo-deny-action@v2

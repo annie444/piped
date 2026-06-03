@@ -112,14 +112,14 @@ eval "$(pipe -s --shell /bin/bash -- 'echo $0')"
 By default `pipe` captures output silently into the variables. If you also want
 to see the output as the command runs, disable capturing:
 
-| Flag                  | Effect                                              |
-| --------------------- | --------------------------------------------------- |
-| `-c`, `--capture`     | Don't capture; stream both stdout and stderr through |
+| Flag                  | Effect                                               |
+| --------------------- | ---------------------------------------------------- |
+| `-c`, `--no-capture`  | Don't capture; stream both stdout and stderr through |
 | `-o`, `--capture-out` | Don't capture stdout; stream it through              |
 | `-e`, `--capture-err` | Don't capture stderr; stream it through              |
 
 The variables are still set in every case — these flags only control whether the
-output is *also* echoed to your terminal as it is produced.
+output is _also_ echoed to your terminal as it is produced.
 
 > **Note:** When streaming is enabled, the live output is written to **stderr**,
 > including the command's own stdout. This is deliberate: `pipe`'s stdout is
@@ -129,29 +129,29 @@ output is *also* echoed to your terminal as it is produced.
 
 ## Options
 
-| Option                  | Default | Description                                              |
-| ----------------------- | ------- | -------------------------------------------------------- |
-| `--stdout <NAME>`       | `out`   | Variable name to store the captured standard output      |
-| `--stderr <NAME>`       | `err`   | Variable name to store the captured standard error       |
-| `--exit-code <NAME>`    | `ec`    | Variable name to store the exit code                     |
-| `-x`, `--export`        | off     | Export the variables into the environment                |
-| `-c`, `--capture`       | capture | Stream all output to the terminal instead of capturing only |
-| `-o`, `--capture-out`   | capture | Stream stdout to the terminal                            |
-| `-e`, `--capture-err`   | capture | Stream stderr to the terminal                            |
-| `-s`, `--sh`            | off     | Run the command through a shell                          |
-| `--shell <PATH>`        | auto    | Shell to use (for `--sh` and for variable syntax)        |
-| `-h`, `--help`          |         | Print help                                               |
-| `-V`, `--version`       |         | Print version                                            |
+| Option                | Default | Description                                                 |
+| --------------------- | ------- | ----------------------------------------------------------- |
+| `--stdout <NAME>`     | `out`   | Variable name to store the captured standard output         |
+| `--stderr <NAME>`     | `err`   | Variable name to store the captured standard error          |
+| `--exit-code <NAME>`  | `ec`    | Variable name to store the exit code                        |
+| `-x`, `--export`      | off     | Export the variables into the environment                   |
+| `-c`, `--no-capture`  | capture | Stream all output to the terminal instead of capturing only |
+| `-o`, `--capture-out` | capture | Stream stdout to the terminal                               |
+| `-e`, `--capture-err` | capture | Stream stderr to the terminal                               |
+| `-s`, `--sh`          | off     | Run the command through a shell                             |
+| `--shell <PATH>`      | auto    | Shell to use (for `--sh` and for variable syntax)           |
+| `-h`, `--help`        |         | Print help                                                  |
+| `-V`, `--version`     |         | Print version                                               |
 
 ## Supported shells
 
 `pipe` emits the correct assignment syntax for the detected shell:
 
-| Shell           | Set                    | Export                     |
-| --------------- | ---------------------- | -------------------------- |
-| `sh`/`bash`/`zsh` | `name=value`         | `export name=value`        |
-| `fish`          | `set name value`       | `set -gx name value`       |
-| `csh`/`tcsh`    | `set name value`       | `setenv name value`        |
+| Shell             | Set              | Export               |
+| ----------------- | ---------------- | -------------------- |
+| `sh`/`bash`/`zsh` | `name=value`     | `export name=value`  |
+| `fish`            | `set name value` | `set -gx name value` |
+| `csh`/`tcsh`      | `set name value` | `setenv name value`  |
 
 ## License
 

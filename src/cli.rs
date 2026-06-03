@@ -50,7 +50,7 @@ pub struct Pipe {
     /// or pipe it to the terminal
     #[arg(
         short = 'c',
-        long = "capture",
+        long = "no-capture",
         default_value_t = true,
         action = ArgAction::SetFalse
     )]

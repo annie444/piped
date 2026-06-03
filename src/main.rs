@@ -126,8 +126,6 @@ fn main() {
     println!("{var};");
     let var = utils::set_var(&sh, cli.export, &cli.stderr, &err);
     println!("{var};");
-    if let Some(ref exit_code) = cli.exit_code {
-        let var = utils::set_var(&sh, cli.export, exit_code, &ec.to_string());
-        println!("{var};");
-    }
+    let var = utils::set_var(&sh, cli.export, &cli.exit_code, &ec.to_string());
+    println!("{var};");
 }

@@ -3,23 +3,38 @@ use clap::{
     builder::{ArgAction, ArgPredicate},
 };
 
+const STDOUT_VAR: &str = "out";
+const STDERR_VAR: &str = "err";
+const EC_VAR: &str = "ec";
+
 /// A simple CLI application that captures standard output
 /// and error of a command
 #[derive(Parser, Debug)]
 #[clap(name = "pipe", author, version, about, long_about = None)]
 pub struct Pipe {
-    /// The variable to store the standard output in
-    #[arg()]
+    /// The shell variable to store the standard output in
+    #[arg(
+        long = "stdout",
+        action = ArgAction::Set,
+        default_value = STDOUT_VAR,
+    )]
     pub stdout: String,
 
-    /// The variable to store the standard error in
-    #[arg()]
+    /// The shell variable to store the standard error in
+    #[arg(
+        long = "stderr",
+        action = ArgAction::Set,
+        default_value = STDERR_VAR,
+    )]
     pub stderr: String,
 
-    /// The variable to store the exit code in
-    /// If not provided, the exit code will not be captured
-    #[arg(long = "exit-code")]
-    pub exit_code: Option<String>,
+    /// The shell variable to store the exit code in
+    #[arg(
+        long = "exit-code",
+        action = ArgAction::Set,
+        default_value = EC_VAR,
+    )]
+    pub exit_code: String,
 
     /// Whether to export the environment variables
     /// or just set them

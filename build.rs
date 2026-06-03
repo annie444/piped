@@ -9,20 +9,19 @@ std::include!("src/cli.rs");
 
 fn main() -> std::io::Result<()> {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").ok_or(ErrorKind::NotFound)?);
-    let profile = env::var_os("PROFILE").ok_or(ErrorKind::NotFound)?;
-    let profile_dir = if profile == "release" {
-        out_dir
+    let profile = env::var("PROFILE").map_err(|_| std::io::Error::from(ErrorKind::NotFound))?;
+    let profile_dir = match profile.as_str() {
+        "release" | "debug" => out_dir
             .ancestors()
             .nth(3)
             .ok_or(ErrorKind::NotFound)?
-            .to_path_buf()
-    } else if profile == "debug" {
-        out_dir
-    } else {
-        return Err(std::io::Error::new(
-            ErrorKind::InvalidData,
-            format!("Unknown profile: {profile:?}"),
-        ));
+            .to_path_buf(),
+        _ => {
+            return Err(std::io::Error::new(
+                ErrorKind::InvalidData,
+                format!("Unknown profile: {profile}"),
+            ));
+        }
     };
 
     let man = Man::new(Pipe::command());
